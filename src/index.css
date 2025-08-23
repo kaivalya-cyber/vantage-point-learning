@@ -2,41 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Academic Mentorship App Design System - Educational & Engaging */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Academic Colors */
+    --background: 220 25% 97%;
+    --foreground: 225 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 225 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 225 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Academic Blue Primary */
+    --primary: 217 91% 52%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 91% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Success Green Secondary */
+    --secondary: 142 76% 36%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Warm Muted Tones */
+    --muted: 220 15% 95%;
+    --muted-foreground: 225 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Energetic Accent */
+    --accent: 32 95% 58%;
+    --accent-foreground: 225 25% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Warning/Error */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders & Inputs */
+    --border: 220 20% 88%;
+    --input: 220 20% 92%;
+    --ring: 217 91% 52%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Custom Design Tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 52%), hsl(142 76% 36%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 25% 98%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 45%));
+    --gradient-accent: linear-gradient(135deg, hsl(32 95% 58%), hsl(32 95% 68%));
+    
+    --shadow-card: 0 4px 20px -4px hsl(225 25% 15% / 0.1);
+    --shadow-button: 0 2px 8px -2px hsl(217 91% 52% / 0.3);
+    --shadow-glow: 0 0 30px hsl(217 91% 52% / 0.4);
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +75,51 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Core Academic Colors - Dark Mode */
+    --background: 225 25% 8%;
+    --foreground: 220 25% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 225 25% 10%;
+    --card-foreground: 220 25% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 225 25% 10%;
+    --popover-foreground: 220 25% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Academic Blue Primary - Brighter in dark */
+    --primary: 217 91% 65%;
+    --primary-foreground: 225 25% 8%;
+    --primary-glow: 217 91% 75%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Success Green Secondary - Adjusted for dark */
+    --secondary: 142 76% 45%;
+    --secondary-foreground: 225 25% 8%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Warm Muted Tones - Dark Mode */
+    --muted: 225 20% 15%;
+    --muted-foreground: 220 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Energetic Accent - Softer in dark */
+    --accent: 32 95% 65%;
+    --accent-foreground: 225 25% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Warning/Error */
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 225 25% 8%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Borders & Inputs - Dark Mode */
+    --border: 225 20% 20%;
+    --input: 225 20% 18%;
+    --ring: 217 91% 65%;
+
+    /* Custom Design Tokens - Dark Mode */
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 65%), hsl(142 76% 45%));
+    --gradient-card: linear-gradient(145deg, hsl(225 25% 10%), hsl(225 25% 12%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 45%), hsl(142 76% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(32 95% 65%), hsl(32 95% 75%));
+    
+    --shadow-card: 0 4px 20px -4px hsl(225 25% 5% / 0.4);
+    --shadow-button: 0 2px 8px -2px hsl(217 91% 65% / 0.3);
+    --shadow-glow: 0 0 30px hsl(217 91% 65% / 0.4);
   }
 }
 
