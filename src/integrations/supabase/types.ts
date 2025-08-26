@@ -369,13 +369,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "question_answers_answerer_id_fkey"
-            columns: ["answerer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "question_answers_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
@@ -418,15 +411,7 @@ export type Database = {
           updated_at?: string | null
           upvotes?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "questions_asker_id_fkey"
-            columns: ["asker_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       scholarships: {
         Row: {
