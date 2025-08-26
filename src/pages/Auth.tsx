@@ -5,14 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { GraduationCap, Mail, Lock, User } from 'lucide-react';
+import { GraduationCap, Mail, Lock, User, Chrome } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +30,7 @@ const Auth = () => {
     password: '',
     displayName: '',
     confirmPassword: '',
+    role: '',
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -73,10 +76,19 @@ const Auth = () => {
       return;
     }
 
+    if (!signUpForm.role) {
+      toast({
+        variant: "destructive",
+        title: "Role Required",
+        description: "Please select your academic status.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.displayName);
+      const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.displayName, signUpForm.role);
       
       if (error) {
         toast({
@@ -90,6 +102,29 @@ const Auth = () => {
           description: "Please check your email to verify your account.",
         });
         navigate('/profile/setup');
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const { error } = await signInWithGoogle();
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Google Sign In Failed",
+          description: error.message,
+        });
       }
     } catch (err: any) {
       toast({
@@ -122,7 +157,30 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full gap-2"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                >
+                  <Chrome className="w-4 h-4" />
+                  Continue with Google
+                </Button>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with email
+                    </span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <div className="relative">
@@ -153,29 +211,69 @@ const Auth = () => {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Signing In...' : 'Sign In'}
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Signing In...' : 'Sign In'}
+                  </Button>
+                </form>
+              </div>
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Display Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Your display name"
-                      className="pl-10"
-                      value={signUpForm.displayName}
-                      onChange={(e) => setSignUpForm({ ...signUpForm, displayName: e.target.value })}
-                      required
-                    />
+              <div className="space-y-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full gap-2"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                >
+                  <Chrome className="w-4 h-4" />
+                  Continue with Google
+                </Button>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with email
+                    </span>
                   </div>
                 </div>
+
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Display Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-name"
+                        type="text"
+                        placeholder="Your display name"
+                        className="pl-10"
+                        value={signUpForm.displayName}
+                        onChange={(e) => setSignUpForm({ ...signUpForm, displayName: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-role">Academic Status</Label>
+                    <Select 
+                      value={signUpForm.role} 
+                      onValueChange={(value) => setSignUpForm({ ...signUpForm, role: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your academic status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="freshman">Freshman - Just starting college</SelectItem>
+                        <SelectItem value="senior">Senior - Final year or upperclassman</SelectItem>
+                        <SelectItem value="alumni">Alumni - Graduated and working</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <div className="relative">
@@ -223,10 +321,11 @@ const Auth = () => {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                  </Button>
+                </form>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
