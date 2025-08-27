@@ -1,72 +1,54 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { AdviceCard } from "@/components/AdviceCard";
-import { Input } from "@/components/ui/input";
+import { EnhancedAdviceCard } from "@/components/EnhancedAdviceCard";
+import { SearchFilters } from "@/components/SearchFilters";
+import { LeaderboardCard } from "@/components/LeaderboardCard";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
-
-// Mock data for demonstration
-const mockAdvice = [
-  {
-    id: '1',
-    course: 'AP Calculus',
-    studyTip: 'Practice derivatives daily for 15 minutes. Use Khan Academy for extra practice problems.',
-    mistake: 'Not understanding the concept before memorizing formulas. Learn WHY calculus works.',
-    resources: 'Khan Academy, Professor Leonard YouTube channel, and study groups',
-    author: 'Sarah M.',
-    isAnonymous: false,
-    upvotes: 24,
-    comments: 8
-  },
-  {
-    id: '2',
-    course: 'AP Biology',
-    studyTip: 'Make flashcards for all vocabulary and review them before bed. Draw diagrams.',
-    mistake: 'Trying to memorize everything without understanding processes and connections.',
-    resources: 'Crash Course Biology, Bozeman Science, and lab partner study sessions',
-    author: 'Anonymous',
-    isAnonymous: true,
-    upvotes: 18,
-    comments: 5
-  },
-  {
-    id: '3',
-    course: 'AP Chemistry',
-    studyTip: 'Balance equations daily and understand stoichiometry thoroughly. It\'s the foundation.',
-    mistake: 'Skipping practice problems and only reading the textbook.',
-    resources: 'ChemGuy videos, practice AP exams, and teacher office hours',
-    author: 'Mike Chen',
-    isAnonymous: false,
-    upvotes: 31,
-    comments: 12
-  }
-];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAdvice } from "@/hooks/useAdvice";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { Loader2, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Browse() {
+  const { advice, loading: adviceLoading, handleUpvote } = useAdvice();
+  const { users, loading: leaderboardLoading } = useLeaderboard();
+  
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterBy, setFilterBy] = useState('all');
-  const [advice, setAdvice] = useState(mockAdvice);
-
-  const handleUpvote = (id: string) => {
-    setAdvice(prev => prev.map(item => 
-      item.id === id ? { ...item, upvotes: item.upvotes + 1 } : item
-    ));
-  };
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [difficulty, setDifficulty] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
 
   const handleComment = (id: string) => {
-    console.log('Comment on advice:', id);
+    toast.info('Comment functionality coming soon!');
+  };
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
 
   const filteredAdvice = advice.filter(item => {
-    const matchesSearch = item.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.studyTip.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = 
+      item.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.study_tip.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    if (filterBy === 'all') return matchesSearch;
-    if (filterBy === 'popular') return matchesSearch && item.upvotes > 20;
-    if (filterBy === 'recent') return matchesSearch; // Would filter by date in real app
+    const matchesTags = selectedTags.length === 0 || 
+      selectedTags.some(tag => item.tags?.includes(tag));
+      
+    const matchesDifficulty = difficulty === 'all' || 
+      item.difficulty_rating === difficulty;
     
-    return matchesSearch;
+    return matchesSearch && matchesTags && matchesDifficulty;
+  }).sort((a, b) => {
+    if (sortBy === 'popular') return b.upvotes - a.upvotes;
+    if (sortBy === 'helpful') return (b.profiles?.reputation || 0) - (a.profiles?.reputation || 0);
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   return (
@@ -74,57 +56,97 @@ export default function Browse() {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Search and Filter Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Browse Student Advice</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Browse & Discover</h1>
           <p className="text-muted-foreground mb-6">
-            Discover helpful tips and insights from senior students who've walked the path before you.
+            Explore helpful advice from top students and see who's leading the community.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses, tips, or subjects..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={filterBy} onValueChange={setFilterBy}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Advice</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="recent">Most Recent</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
-        {/* Advice Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1 max-w-4xl mx-auto">
-          {filteredAdvice.map((item) => (
-            <AdviceCard
-              key={item.id}
-              {...item}
-              onUpvote={handleUpvote}
-              onComment={handleComment}
+        <Tabs defaultValue="advice" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="advice">Student Advice</TabsTrigger>
+            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Leaderboard
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="advice" className="space-y-6">
+            <SearchFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              selectedTags={selectedTags}
+              onTagToggle={handleTagToggle}
+              difficulty={difficulty}
+              onDifficultyChange={setDifficulty}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
             />
-          ))}
-        </div>
 
-        {filteredAdvice.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No advice found matching your search.</p>
-            <Button variant="outline" className="mt-4" onClick={() => setSearchTerm('')}>
-              Clear Search
-            </Button>
-          </div>
-        )}
+            {adviceLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid gap-6 max-w-4xl mx-auto">
+                {filteredAdvice.map((item) => (
+                  <EnhancedAdviceCard
+                    key={item.id}
+                    {...item}
+                    onUpvote={handleUpvote}
+                    onComment={handleComment}
+                  />
+                ))}
+              </div>
+            )}
+
+            {!adviceLoading && filteredAdvice.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No advice found matching your criteria.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4" 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedTags([]);
+                    setDifficulty('all');
+                  }}
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="leaderboard">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                  Top Contributors
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {leaderboardLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {users.slice(0, 10).map((user, index) => (
+                      <LeaderboardCard
+                        key={user.id}
+                        user={user}
+                        rank={index + 1}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

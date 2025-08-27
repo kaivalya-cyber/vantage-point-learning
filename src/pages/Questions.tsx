@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { MessageCircle, Plus, ChevronUp, Clock, User, BookOpen, Award } from 'lucide-react';
+import { MessageCircle, Plus, ChevronUp, Clock, User, BookOpen, Award, ThumbsUp, Star } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Question {
   id: string;
@@ -27,6 +28,7 @@ interface Question {
     display_name: string;
     role: string;
     college: string;
+    reputation: number;
   } | null;
   question_answers: {
     id: string;
@@ -39,13 +41,13 @@ interface Question {
       display_name: string;
       role: string;
       college: string;
+      reputation: number;
     } | null;
   }[];
 }
 
 const Questions = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,10 +78,10 @@ const Questions = () => {
         .from('questions')
         .select(`
           *,
-          profiles(display_name, role, college),
+          profiles(display_name, role, college, reputation),
           question_answers(
             id, content, upvotes, is_accepted, created_at, answerer_id,
-            profiles(display_name, role, college)
+            profiles(display_name, role, college, reputation)
           )
         `)
         .order('created_at', { ascending: false });
@@ -87,11 +89,7 @@ const Questions = () => {
       if (error) throw error;
       setQuestions((data as any) || []);
     } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch questions.",
-      });
+      toast.error("Failed to fetch questions");
     } finally {
       setLoading(false);
     }
@@ -100,11 +98,7 @@ const Questions = () => {
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Required",
-        description: "Please sign in to ask a question.",
-      });
+      toast.error("Please sign in to ask a question");
       return;
     }
 
@@ -123,16 +117,9 @@ const Questions = () => {
       setNewQuestion({ title: '', content: '', category: '' });
       setIsDialogOpen(false);
       fetchQuestions();
-      toast({
-        title: "Question Posted!",
-        description: "Your question has been posted successfully.",
-      });
+      toast.success("Your question has been posted successfully!");
     } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to post question.",
-      });
+      toast.error("Failed to post question");
     }
   };
 
@@ -153,46 +140,47 @@ const Questions = () => {
       setNewAnswer('');
       setAnsweringQuestion(null);
       fetchQuestions();
-      toast({
-        title: "Answer Posted!",
-        description: "Your answer has been posted successfully.",
-      });
+      toast.success("Your answer has been posted successfully!");
     } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to post answer.",
-      });
+      toast.error("Failed to post answer");
     }
   };
 
   const handleUpvoteQuestion = async (questionId: string) => {
     if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Required",
-        description: "Please sign in to upvote questions.",
-      });
+      toast.error("Please log in to upvote questions");
       return;
     }
 
     try {
-      const question = questions.find(q => q.id === questionId);
-      if (!question) return;
+      // Check if user already upvoted this question
+      const { data: existingUpvote } = await supabase
+        .from('question_upvotes')
+        .select('id')
+        .eq('question_id', questionId)
+        .eq('user_id', user.id)
+        .single();
 
-      const { error } = await supabase
-        .from('questions')
-        .update({ upvotes: question.upvotes + 1 })
-        .eq('id', questionId);
+      if (existingUpvote) {
+        // Remove upvote
+        await supabase
+          .from('question_upvotes')
+          .delete()
+          .eq('question_id', questionId)
+          .eq('user_id', user.id);
+        toast.success("Upvote removed");
+      } else {
+        // Add upvote
+        await supabase
+          .from('question_upvotes')
+          .insert({ question_id: questionId, user_id: user.id });
+        toast.success("Question upvoted!");
+      }
 
-      if (error) throw error;
-      fetchQuestions();
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to upvote question.",
-      });
+      fetchQuestions(); // Refresh to get updated counts
+    } catch (error) {
+      console.error('Error upvoting question:', error);
+      toast.error("Failed to upvote question");
     }
   };
 

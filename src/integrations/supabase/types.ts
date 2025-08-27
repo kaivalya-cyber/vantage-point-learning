@@ -27,6 +27,7 @@ export type Database = {
           mistake: string | null
           resources: string | null
           study_tip: string
+          tags: string[] | null
           updated_at: string | null
           upvotes: number | null
         }
@@ -42,6 +43,7 @@ export type Database = {
           mistake?: string | null
           resources?: string | null
           study_tip: string
+          tags?: string[] | null
           updated_at?: string | null
           upvotes?: number | null
         }
@@ -57,6 +59,7 @@ export type Database = {
           mistake?: string | null
           resources?: string | null
           study_tip?: string
+          tags?: string[] | null
           updated_at?: string | null
           upvotes?: number | null
         }
@@ -109,6 +112,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      advice_upvotes: {
+        Row: {
+          advice_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          advice_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          advice_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advice_upvotes_advice_id_fkey"
+            columns: ["advice_id"]
+            isOneToOne: false
+            referencedRelation: "advice"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      answer_upvotes: {
+        Row: {
+          answer_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_upvotes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "question_answers"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -285,6 +346,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          badges: string[] | null
           bio: string | null
           certifications: string[] | null
           college: string | null
@@ -293,16 +355,21 @@ export type Database = {
           email: string | null
           extracurriculars: string[] | null
           graduation_year: number | null
+          helpful_answers: number | null
           id: string
           major: string | null
           points: number | null
+          reputation: number | null
           role: Database["public"]["Enums"]["user_role"]
           sports: string[] | null
+          total_answers: number | null
+          total_questions: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          badges?: string[] | null
           bio?: string | null
           certifications?: string[] | null
           college?: string | null
@@ -311,16 +378,21 @@ export type Database = {
           email?: string | null
           extracurriculars?: string[] | null
           graduation_year?: number | null
+          helpful_answers?: number | null
           id?: string
           major?: string | null
           points?: number | null
+          reputation?: number | null
           role?: Database["public"]["Enums"]["user_role"]
           sports?: string[] | null
+          total_answers?: number | null
+          total_questions?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          badges?: string[] | null
           bio?: string | null
           certifications?: string[] | null
           college?: string | null
@@ -329,11 +401,15 @@ export type Database = {
           email?: string | null
           extracurriculars?: string[] | null
           graduation_year?: number | null
+          helpful_answers?: number | null
           id?: string
           major?: string | null
           points?: number | null
+          reputation?: number | null
           role?: Database["public"]["Enums"]["user_role"]
           sports?: string[] | null
+          total_answers?: number | null
+          total_questions?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -370,6 +446,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "question_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_upvotes: {
+        Row: {
+          created_at: string | null
+          id: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_upvotes_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
