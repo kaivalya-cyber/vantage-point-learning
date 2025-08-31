@@ -1,4 +1,4 @@
-import { GraduationCap, Menu, BookOpen, Star, Users, MessageCircle, User, LogOut } from "lucide-react";
+import { GraduationCap, Menu, BookOpen, Star, Users, MessageCircle, User, LogOut, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -62,6 +62,15 @@ export const Header = () => {
             >
               <MessageCircle className="w-4 h-4" />
               Q&A
+            </Button>
+            <Button 
+              variant={isActive('/badges') ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => navigate('/badges')}
+              className="gap-2"
+            >
+              <Award className="w-4 h-4" />
+              Badges
             </Button>
           </nav>
         </div>
