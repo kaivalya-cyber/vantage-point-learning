@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { MessageCircle, Plus, ChevronUp, Clock, User, BookOpen, Award, ThumbsUp, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import { moderateQuestion, moderateAnswer } from '@/lib/contentModeration';
 
 interface Question {
   id: string;
@@ -102,6 +103,13 @@ const Questions = () => {
       return;
     }
 
+    // Content moderation check
+    const moderationResult = moderateQuestion(newQuestion.title, newQuestion.content);
+    if (!moderationResult.isAllowed) {
+      toast.error(moderationResult.reason || "Content not allowed");
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('questions')
@@ -125,6 +133,13 @@ const Questions = () => {
 
   const handleSubmitAnswer = async (questionId: string) => {
     if (!user || !newAnswer.trim()) return;
+
+    // Content moderation check
+    const moderationResult = moderateAnswer(newAnswer);
+    if (!moderationResult.isAllowed) {
+      toast.error(moderationResult.reason || "Answer not allowed");
+      return;
+    }
 
     try {
       const { error } = await supabase
