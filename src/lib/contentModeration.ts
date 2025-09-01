@@ -51,7 +51,7 @@ export function moderateContent(content: string): ModerationResult {
   
   // Check for harmful patterns
   for (const pattern of HARMFUL_PATTERNS) {
-    const match = normalizedContent.match(pattern);
+    const match = normalizedContent.match(pattern);       
     if (match) {
       return {
         isAllowed: false,
@@ -82,7 +82,7 @@ export function moderateContent(content: string): ModerationResult {
 }
 
 export function moderateQuestion(title: string, content: string): ModerationResult {
-  // Check title
+  // Check title        
   const titleResult = moderateContent(title);
   if (!titleResult.isAllowed) {
     return {
